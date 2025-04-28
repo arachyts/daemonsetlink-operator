@@ -1,0 +1,19 @@
+apiVersion: operators.operators.artnetlab.tech/v1alpha1
+kind: DaemonSetLink
+metadata:
+  labels:
+    app.kubernetes.io/name: daemonsetlink-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: daemonsetlink-sample
+  namespace: default
+spec:
+  sourceRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: loki
+    namespace: default
+  targetDaemonSetRef:
+    name: promtail
+    namespace: default
+  disabledNodeSelector:
+    nonexistent.daemonsetlink.operator/disable: "true" # Provide your chosen selector
