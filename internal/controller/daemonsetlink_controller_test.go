@@ -70,7 +70,6 @@ var _ = Describe("DaemonSetLink Controller", func() {
 			By("Reconciling the created resource")
 			controllerReconciler := &DaemonSetLinkReconciler{
 				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
