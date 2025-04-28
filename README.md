@@ -1,7 +1,7 @@
 # daemonsetlink-operator
 This operator links DaemonSets to Deployments or StatefulSets. When the source object is scaled to 0, the DaemonSet is scaled to 0 too
 ## Description
-The operator scales a DS to 0 by applying a non-existent node selector. Usually DS should run on all (selected) nodes in a cluster, however there are cases where scaling DS down to 0 might be required. For example, if a log collector is scaled down, there's little purpose to run log agents on all nodes. Tools like KEDA do not support DS because it doesn't have scaling API.
+The operator scales a DS to 0 by applying a non-existent node selector. Usually DS should run on all (selected) nodes in a cluster, however there are cases where scaling DS down to 0 might be desirable. For example, if a log collector is scaled down, there's little purpose to run log agents on all nodes. Tools like KEDA do not support scaling DS because DS doesn't have scaling API.
 
 Real world example: scale promtail DS down to 0 if loki is scaled down to 0.
 
