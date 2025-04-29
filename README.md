@@ -15,7 +15,7 @@ This will install CRDs, permissions, and create a deployment in `kube-system` na
 
 You can then configure `DaemonSetLink` objects to start tracking specific source-target pairs. See examples in [samples](https://github.com/arachyts/daemonsetlink-operator/blob/main/config/samples/operators_v1alpha1_daemonsetlink.yaml)
 
-## Getting Started
+## Getting Started - Advanced
 
 ### Prerequisites
 - go version v1.22.0+
