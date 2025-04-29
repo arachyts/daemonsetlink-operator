@@ -45,9 +45,9 @@ type DaemonSetLinkReconciler struct {
 	Recorder record.EventRecorder
 }
 
-// +kubebuilder:rbac:groups=operators.operators.artnetlab.tech,resources=daemonsetlinks,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=operators.operators.artnetlab.tech,resources=daemonsetlinks/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=operators.operators.artnetlab.tech,resources=daemonsetlinks/finalizers,verbs=update
+// +kubebuilder:rbac:groups=operators.artnetlab.tech,resources=daemonsetlinks,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=operators.artnetlab.tech,resources=daemonsetlinks/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=operators.artnetlab.tech,resources=daemonsetlinks/finalizers,verbs=update
 //+kubebuilder:rbac:groups=apps,resources=deployments;statefulsets,verbs=get;list;watch
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;patch
 
