@@ -5,4 +5,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink
-  newTag: v0.1.2
+  newTag: v0.1.3
