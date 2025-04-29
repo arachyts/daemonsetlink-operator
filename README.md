@@ -17,7 +17,7 @@ Real world example: scale promtail DS down to 0 if loki is scaled down to 0.
 **Build and push your image to the location specified by `IMG`:**
 
 ```sh
-make docker-build docker-push IMG=<some-registry>/daemonsetlink-operator:tag
+make docker-buildx IMG=<some-registry>/daemonsetlink-operator:tag PLATFORMS="linux/amd64,linux/arm64"
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
@@ -43,7 +43,7 @@ privileges or be logged in as admin.
 You can apply the samples (examples) from the config/sample:
 
 ```sh
-kubectl apply -k config/samples/
+kubectl apply -k config/samples/operators_v1alpha1_daemonsetlink.yaml
 ```
 
 >**NOTE**: Ensure that the samples has default values to test it out.
@@ -52,7 +52,7 @@ kubectl apply -k config/samples/
 **Delete the instances (CRs) from the cluster:**
 
 ```sh
-kubectl delete -k config/samples/
+kubectl delete -k config/samples/operators_v1alpha1_daemonsetlink.yaml
 ```
 
 **Delete the APIs(CRDs) from the cluster:**
@@ -89,13 +89,6 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/<org>/daemonsetlink-operator/<tag or branch>/dist/install.yaml
 ```
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-**NOTE:** Run `make help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
 
 ## License
 
