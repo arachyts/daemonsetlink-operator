@@ -15,7 +15,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: operators.artnetlab.tech
+  domain: artnetlab.tech
   group: operators
   kind: DaemonSetLink
   path: github.com/arachyts/daemonsetlink-operator/api/v1alpha1
