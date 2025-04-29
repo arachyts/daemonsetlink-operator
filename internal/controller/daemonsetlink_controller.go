@@ -288,30 +288,46 @@ func (r *DaemonSetLinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	// mapFn maps Deployment/StatefulSet events to DaemonSetLink reconcile requests
 	mapFn := func(ctx context.Context, obj client.Object) []reconcile.Request {
-		reqLog := logf.FromContext(ctx) // Use context logger
+		reqLog := logf.FromContext(ctx)
 		linkList := &operatorsv1alpha1.DaemonSetLinkList{}
 
-		// List all DaemonSetLinks - Consider using an index for scalability if many links exist
-		// If CRs are namespaced, use client.MatchingFields or filter manually based on obj.GetNamespace() if needed
-		if err := r.List(ctx, linkList /*, client.InNamespace(obj.GetNamespace())*/); err != nil {
+		// List all DaemonSetLinks
+		if err := r.List(ctx, linkList); err != nil {
 			reqLog.Error(err, "Failed to list DaemonSetLinks to map source object change")
 			return []reconcile.Request{}
 		}
 
-		requests := make([]reconcile.Request, 0, len(linkList.Items)) // Pre-allocate slice
-		sourceKind := obj.GetObjectKind().GroupVersionKind().Kind
+		requests := make([]reconcile.Request, 0, len(linkList.Items))
 		sourceName := obj.GetName()
 		sourceNamespace := obj.GetNamespace()
 
-		reqLog.V(1).Info("Checking DaemonSetLinks for source object change", "SourceKind", sourceKind, "SourceName", sourceName, "SourceNamespace", sourceNamespace)
+		// --- Determine Kind (GVK with Reflect Fallback) ---
+		sourceKind := obj.GetObjectKind().GroupVersionKind().Kind
+		methodUsed := "GVK" // For logging
+		if sourceKind == "" {
+			// Fallback: Use reflection to get the type name
+			// Get the concrete type (dereference pointer if necessary)
+			objType := reflect.TypeOf(obj)
+			if objType.Kind() == reflect.Ptr {
+				objType = objType.Elem()
+			}
+			sourceKind = objType.Name() // e.g., "Deployment", "StatefulSet"
+			methodUsed = "Reflection"   // For logging
+		}
+		// --- End Determine Kind ---
+
+		reqLog.Info("Processing source object change", "DetectedKind", sourceKind, "Method", methodUsed, "Name", sourceName, "Namespace", sourceNamespace)
 
 		for _, item := range linkList.Items {
-			if item.Spec.SourceRef.Kind == sourceKind &&
-				item.Spec.SourceRef.Name == sourceName &&
-				item.Spec.SourceRef.Namespace == sourceNamespace {
+			// Now compare using the determined sourceKind
+			if item.Spec.SourceRef.Name == sourceName &&
+				item.Spec.SourceRef.Namespace == sourceNamespace &&
+				item.Spec.SourceRef.Kind == sourceKind { // Compare against the determined Kind
 
-				reqLog.Info("Detected change in linked source object, queueing DaemonSetLink reconcile",
-					"SourceKind", sourceKind, "SourceName", sourceName, "SourceNamespace", sourceNamespace,
+				reqLog.Info("Matched source object change to DaemonSetLink, queueing reconcile",
+					"DeterminedSourceKind", sourceKind,
+					"LinkSourceKind", item.Spec.SourceRef.Kind,
+					"SourceName", sourceName, "SourceNamespace", sourceNamespace,
 					"DaemonSetLink", types.NamespacedName{Name: item.Name, Namespace: item.Namespace})
 
 				requests = append(requests, reconcile.Request{
@@ -320,8 +336,17 @@ func (r *DaemonSetLinkReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						Namespace: item.Namespace,
 					},
 				})
+			} else {
+				// Add verbose logging for debugging mismatches if needed
+				// reqLog.V(1).Info("No match for DaemonSetLink",
+				// 	"LinkName", item.Name,
+				// 	"LinkSourceRef", item.Spec.SourceRef,
+				// 	"EventSourceKind", sourceKind,
+				// 	"EventSourceName", sourceName,
+				// 	"EventSourceNamespace", sourceNamespace)
 			}
 		}
+
 		return requests
 	}
 
