@@ -56,8 +56,6 @@ You can apply the samples (examples) from the config/sample:
 kubectl apply -k config/samples/operators_v1alpha1_daemonsetlink.yaml
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
-
 ### To Uninstall
 **Delete the instances (CRs) from the cluster:**
 
@@ -75,29 +73,6 @@ make uninstall
 
 ```sh
 make undeploy
-```
-
-## Project Distribution
-
-Following are the steps to build the installer and distribute this project to users.
-
-1. Build the installer for the image built and published in the registry:
-
-```sh
-make build-installer IMG=<some-registry>/daemonsetlink-operator:tag
-```
-
-NOTE: The makefile target mentioned above generates an 'install.yaml'
-file in the dist directory. This file contains all the resources built
-with Kustomize, which are necessary to install this project without
-its dependencies.
-
-2. Using the installer
-
-Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project, i.e.:
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/<org>/daemonsetlink-operator/<tag or branch>/dist/install.yaml
 ```
 
 ## License
