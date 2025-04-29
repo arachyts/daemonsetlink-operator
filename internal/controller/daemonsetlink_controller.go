@@ -50,6 +50,7 @@ type DaemonSetLinkReconciler struct {
 // +kubebuilder:rbac:groups=operators.artnetlab.tech,resources=daemonsetlinks/finalizers,verbs=update
 //+kubebuilder:rbac:groups=apps,resources=deployments;statefulsets,verbs=get;list;watch
 //+kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;patch
+//+kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 
 func (r *DaemonSetLinkReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := logf.FromContext(ctx)
