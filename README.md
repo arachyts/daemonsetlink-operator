@@ -40,6 +40,16 @@ Make sure you have the proper permission to the registry if the above commands d
 make install
 ```
 
+**Customize manifests**
+
+Edit [kustomization](https://github.com/arachyts/daemonsetlink-operator/blob/main/config/default/kustomization.yaml)
+
+Generate manifests:
+
+```sh
+make manifests generate
+```
+
 **Deploy the Manager to the cluster with the image specified by `IMG`:**
 
 ```sh
