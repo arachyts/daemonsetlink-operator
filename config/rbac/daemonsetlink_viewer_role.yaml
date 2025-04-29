@@ -8,7 +8,7 @@ metadata:
   name: daemonsetlink-viewer-role
 rules:
 - apiGroups:
-  - operators.operators.artnetlab.tech
+  - operators.artnetlab.tech
   resources:
   - daemonsetlinks
   verbs:
@@ -16,7 +16,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - operators.operators.artnetlab.tech
+  - operators.artnetlab.tech
   resources:
   - daemonsetlinks/status
   verbs:

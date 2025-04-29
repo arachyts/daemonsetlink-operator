@@ -23,7 +23,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - operators.operators.artnetlab.tech
+  - operators.artnetlab.tech
   resources:
   - daemonsetlinks
   verbs:
@@ -35,13 +35,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - operators.operators.artnetlab.tech
+  - operators.artnetlab.tech
   resources:
   - daemonsetlinks/finalizers
   verbs:
   - update
 - apiGroups:
-  - operators.operators.artnetlab.tech
+  - operators.artnetlab.tech
   resources:
   - daemonsetlinks/status
   verbs:
