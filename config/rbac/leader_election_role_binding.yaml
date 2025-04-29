@@ -3,7 +3,6 @@ kind: RoleBinding
 metadata:
   labels:
     app.kubernetes.io/name: daemonsetlink-operator
-    app.kubernetes.io/managed-by: kustomize
   name: leader-election-rolebinding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -12,4 +11,3 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: controller-manager
-  namespace: system
