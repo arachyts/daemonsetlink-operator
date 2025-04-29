@@ -8,7 +8,7 @@ Real world example: scale promtail DS down to 0 if loki is scaled down to 0.
 ## Getting Started TL;DR - I only want to install it in my cluster
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/arachyts/daemonsetlink-operator/v0.1.1/dist/install.yaml
+kubectl apply -f https://raw.githubusercontent.com/arachyts/daemonsetlink-operator/v0.1.2/dist/install.yaml
 ```
 
 This will install CRDs, permissions, and create a deployment in `kube-system` namespace.

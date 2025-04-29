@@ -147,5 +147,5 @@ patches:
 #          create: true
 images:
   - name: controller
-    newName: 474668383294.dkr.ecr.eu-central-1.amazonaws.com/operators.artnetlab.tech/dslink
-    newTag: v0.1.0
+    newName: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink
+    newTag: v0.1.2
