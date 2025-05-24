@@ -5,7 +5,29 @@ The operator scales a DS to 0 by applying a non-existent node selector. Usually 
 
 Real world example: scale promtail DS down to 0 if loki is scaled down to 0.
 
-## Getting Started TL;DR - I only want to install it in my cluster
+## Installing using Helm
+
+Add helm repo:
+
+```sh
+helm repo add dslink-repo https://arachyts.github.io/daemonsetlink-operator/
+helm repo update
+```
+
+Install the release:
+
+```sh
+helm install dslink-prod dslink-repo/daemonsetlink-operator --namespace kube-system
+```
+
+You can optionally modify and specify [values](https://github.com/arachyts/daemonsetlink-operator/blob/main/charts/daemonsetlink-operator/values.yaml) file too:
+
+```sh
+helm install dslink-prod dslink-repo/daemonsetlink-operator --namespace kube-system -f values.yaml
+```
+
+
+## Getting Started with raw manifests TL;DR - I only want to install it in my cluster
 
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/arachyts/daemonsetlink-operator/v0.1.3/dist/install.yaml
