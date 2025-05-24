@@ -1,6 +1,6 @@
 apiVersion: v2
 name: daemonsetlink-operator
-description: A Helm chart for Kubernetes DaemonSetLink Operator. This operator monitors Deployments or StatefulSets and syncs their node affinity, tolerations, and pod scheduling rules to a target DaemonSet.
+description: A Helm chart for Kubernetes DaemonSetLink Operator. DaemonSetLink operator links DaemonSets to Deployments or StatefulSets. When the source resource is scaled to 0, the DS is scaled to 0 too
 type: application
 
 # This is the chart version
