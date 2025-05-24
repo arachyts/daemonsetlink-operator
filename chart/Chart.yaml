@@ -1,0 +1,10 @@
+apiVersion: v2
+name: daemonsetlink-operator
+description: A Helm chart for Kubernetes DaemonSetLink Operator. This operator monitors Deployments or StatefulSets and syncs their node affinity, tolerations, and pod scheduling rules to a target DaemonSet.
+type: application
+
+# This is the chart version
+version: 0.1.0
+
+# This is the version number of the application being deployed
+appVersion: "v0.1.3"
