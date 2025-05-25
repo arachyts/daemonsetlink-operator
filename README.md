@@ -27,13 +27,13 @@ helm install dslink-prod dslink-repo/daemonsetlink-operator --namespace kube-sys
 ```
 
 
-## Getting Started with raw manifests TL;DR - I only want to install it in my cluster
+## Installing using raw manifests
 
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/arachyts/daemonsetlink-operator/v0.1.3/dist/install.yaml
 ```
 
-This will install CRDs, permissions, and create a deployment in `kube-system` namespace.
+This will install CRDs, permissions, and create a deployment in the `kube-system` namespace.
 
 You can then configure `DaemonSetLink` objects to start tracking specific source-target pairs. See examples in [samples](https://github.com/arachyts/daemonsetlink-operator/blob/main/config/samples/operators_v1alpha1_daemonsetlink.yaml)
 
@@ -106,20 +106,3 @@ make uninstall
 ```sh
 make undeploy
 ```
-
-## License
-
-Copyright 2025.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
