@@ -27,7 +27,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref }}
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref }}
 
       - name: Configure Go
         uses: actions/setup-go@v5
