@@ -157,9 +157,10 @@ jobs:
           VERSION=${{ needs.build-and-push-controller-image.outputs.version }}
           echo "tag=$VERSION" >> $GITHUB_OUTPUT
           git tag $VERSION
+          git tag
 
           # Push both the commit on the branch AND the new tag at the same time
-          git push --follow-tags
+          git push --follow-tags --verbose
 
       - name: Set up Helm
         uses: azure/setup-helm@v4 
