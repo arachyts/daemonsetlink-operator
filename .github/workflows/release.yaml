@@ -167,6 +167,7 @@ jobs:
           version: 'latest'
 
       - name: Run chart-releaser
+        id: chart_release
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: "charts"
@@ -177,7 +178,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ steps.tagger.outputs.tag }} dist/install.yaml --clobber
+          gh release upload ${{ steps.chart_release.outputs.tag_name }} dist/install.yaml --clobber
           
       - name: Deploy install.yaml to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
