@@ -138,7 +138,7 @@ jobs:
           IMAGE_TAG=${{ needs.build-and-push-controller-image.outputs.image_tag }}
           VERSION=${{ needs.build-and-push-controller-image.outputs.version }}
 
-          make update-release-manifests IMG=$IMAGE_TAG VERSION=$VERSION
+          make update-release-sources IMG=$IMAGE_TAG VERSION=$VERSION
 
       - name: Commit, Tag, and Push
         id: tagger
