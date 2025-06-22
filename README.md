@@ -30,7 +30,7 @@ helm install dslink-prod dslink-repo/daemonsetlink-operator --namespace kube-sys
 ## Installing using raw manifests
 
 ```sh
-kubectl apply -f https://raw.githubusercontent.com/arachyts/daemonsetlink-operator/v0.1.3/dist/install.yaml
+kubectl apply -f https://arachyts.github.io/daemonsetlink-operator/install.yaml
 ```
 
 This will install CRDs, permissions, and create a deployment in the `kube-system` namespace.
