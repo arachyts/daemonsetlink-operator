@@ -134,6 +134,15 @@ jobs:
         run: |
           sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
           sudo chmod +x /usr/bin/yq
+      
+      - name: Get Chart Information
+        id: get_chart_info
+        run: |
+          CHART_NAME=$(yq e '.name' charts/daemonsetlink-operator/Chart.yaml)
+          CHART_VERSION=$(yq e '.version' charts/daemonsetlink-operator/Chart.yaml)
+          TAG_NAME="${CHART_NAME}-${CHART_VERSION}"
+          echo "Constructed Tag Name: $TAG_NAME"
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
       - name: Update helm charts and kubernetes manifests
         run: |
@@ -142,8 +151,7 @@ jobs:
 
           make update-release-sources IMG=$IMAGE_TAG VERSION=$VERSION
 
-      - name: Commit, Tag, and Push
-        id: tagger
+      - name: Commit and Push
         run: |
           # Commit changes if any
           if ! git diff --quiet; then
@@ -160,8 +168,7 @@ jobs:
           version: 'latest'
 
       - name: Run chart-releaser
-        id: chart_release
-        uses: helm/chart-releaser-action@v2.0.0
+        uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: "charts"
         env:
@@ -171,11 +178,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ steps.chart_release.outputs.tag_name }} dist/install.yaml --clobber
+          gh release upload ${{ steps.get_chart_info.outputs.tag_name }} dist/install.yaml --clobber
           
       - name: Deploy install.yaml to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
-          commit_message: Update install.yaml for release ${{ steps.chart_release.outputs.tag_name }}
+          commit_message: Update install.yaml for release ${{ steps.get_chart_info.outputs.tag_name }}
