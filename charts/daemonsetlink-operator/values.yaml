@@ -6,8 +6,6 @@ nameOverride: "dslink-operator"
 image:
   repository: "public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink"
   pullPolicy: IfNotPresent
-  # By default tag is set to .Chart.AppVersion
-  # tag: "v0.1.3"
 
 replicaCount: 1
 

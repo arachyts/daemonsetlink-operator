@@ -5,6 +5,9 @@
 # - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
 VERSION ?= 0.0.1
 
+# Project name for Helm builds
+PROJECT_NAME ?= daemonsetlink-operator
+
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "candidate,fast,stable")
 # To re-generate a bundle for other specific channels without changing the standard setup, you can:
@@ -170,6 +173,17 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 	mkdir -p dist
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
 	$(KUSTOMIZE) build config/default > dist/install.yaml
+
+.PHONY: update-helm-sources
+update-helm-sources: ## Updates the Helm chart's appVersion and image tag. The chart 'version' must be updated manually.
+	@echo "--- Updating Helm chart to version $(VERSION) with image $(IMG) ---"
+	yq e -i '.appVersion = strenv(VERSION)' charts/$(PROJECT_NAME)/Chart.yaml
+	yq e -i '.image.repository = "$(shell echo ${IMG} | rev | cut -d: -f2- | rev)"' charts/$(PROJECT_NAME)/values.yaml
+	yq e -i '.image.tag = "$(shell echo ${IMG} | rev | cut -d: -f1 | rev)"' charts/$(PROJECT_NAME)/values.yaml
+
+.PHONY: update-release-sources
+update-release-sources: build-installer update-helm-sources
+	@echo "All source manifests have been updated for commit."
 
 ##@ Deployment
 
