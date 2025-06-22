@@ -1,34 +1,162 @@
-name: Release Helm Chart
+name: Create and publish release
 
 on:
   push:
-    tags:
-      - "v0.1.*" # Minor release versions
-  workflow_dispatch: # Allows manual triggering from the Actions tab
+    branches:
+      - 'release-v*.*.*'
+  # Allow manual triggering
+  workflow_dispatch:
     inputs:
-      tag_to_release:
-        description: 'The git tag to create a chart release for (e.g., v0.1.0)'
+      branch_to_release:
+        description: 'The release branch to process (e.g. release-v0.1.1)'
         required: true
-        # Example: default: 'v0.1.0' (optional default)
+        type: string
+
+env:
+  AWS_REGION: eu-central-1
+  REGISTRY: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech
+  IMAGE_NAME: dslink
+  BUILD_PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
-  release:
+  pre-flight-checks:
+    name: Run Go linters and tests
     runs-on: ubuntu-latest
     permissions:
-      contents: write # To create GitHub releases and push to gh-pages
+      contents: read
     steps:
-      - name: Checkout code at specific tag
+      - name: Checkout code
+        uses: actions/checkout@v4
+        ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref }}
+
+      - name: Configure Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Run go fmt check
+        run: |
+          echo "Running recursive go fmt..."
+          go fmt ./...
+
+          echo "Checking for uncommitted formatting changes..."
+          if git diff --exit-code; then
+            echo "SUCCESS: Code fmt check pass"
+          else
+            echo "FAIL: Code is not formatted"
+            exit 1
+          fi
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Install setup-envtest
+        run: go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+
+      - name: Run controller tests
+        run: make test
+  
+  build-and-push-controller-image:
+    name: Build and push controller container image
+    runs-on: ubuntu-latest
+    needs: pre-flight-checks
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image_tag: ${{ steps.build-and-push.outputs.image_tag }}
+      version: ${{ steps.get_version.outputs.VERSION }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Version from Branch
+        id: get_version
+        run: |
+          # For 'workflow_dispatch', the ref is the input. For 'push', it's the branch name.
+          REF=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref_name }}
+          # Strips 'release-' prefix to get the version (e.g., release-v0.1.0 -> v0.1.0)
+          VERSION=${REF#release-}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsECRRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU for multi-platform builds
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push controller image
+        id: build-and-push
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
+
+          make docker-buildx IMG=${IMAGE_TAG} PLATFORMS=${{ env.BUILD_PLATFORMS }}
+
+          echo "image_tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
+
+  create_release:
+    name: Update manifests and create release
+    runs-on: ubuntu-latest
+    needs: build-and-push-controller-image
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # If triggered by a tag push, github.ref is 'refs/tags/vX.Y.Z'.
-          # If triggered by workflow_dispatch, use the input tag.
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag_to_release || github.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref_name }}
+          # We need full history for chart-releaser's changelog generation
           fetch-depth: 0
 
       - name: Configure Git
         run: |
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install yq for Makefile
+        run: |
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          sudo chmod +x /usr/bin/yq
+
+      - name: Update helm charts and kubernetes manifests
+        run: |
+          IMAGE_TAG=${{ needs.build-and-push-controller-image.outputs.image_tag }}
+          VERSION=${{ needs.build-and-push-controller-image.outputs.version }}
+
+          make update-release-manifests IMG=$IMAGE_TAG VERSION=$VERSION
+
+      - name: Commit, Tag, and Push
+        id: tagger
+        run: |
+          # Commit changes if any
+          if ! git diff --quiet; then
+            git add .
+            git commit -m "chore(release): Update manifests for version ${{ needs.build-and-push-controller-image.outputs.version }}"
+          else
+            echo "No manifest changes to commit."
+          fi
+          
+          # Create tag and set it as a step output
+          VERSION=${{ needs.build-and-push-controller-image.outputs.version }}
+          echo "tag=$VERSION" >> $GITHUB_OUTPUT
+          git tag $VERSION
+
+          # Push both the commit on the branch AND the new tag at the same time
+          git push --follow-tags
 
       - name: Set up Helm
         uses: azure/setup-helm@v4 
@@ -41,3 +169,16 @@ jobs:
           charts_dir: "charts"
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Upload install.yaml to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ steps.tagger.outputs.tag }} dist/install.yaml --clobber
+          
+      - name: Deploy install.yaml to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          commit_message: Update install.yaml for release ${{ steps.tagger.outputs.tag }}
