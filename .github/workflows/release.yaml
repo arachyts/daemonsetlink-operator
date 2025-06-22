@@ -156,8 +156,7 @@ jobs:
           # Create tag and set it as a step output
           VERSION=${{ needs.build-and-push-controller-image.outputs.version }}
           echo "tag=$VERSION" >> $GITHUB_OUTPUT
-          git tag $VERSION
-          git tag
+          git tag -a $VERSION -m "Release version $VERSION"
 
           # Push both the commit on the branch AND the new tag at the same time
           git push --follow-tags --verbose
