@@ -396,7 +396,7 @@ spec:
         - --health-probe-bind-address=:8081
         command:
         - /manager
-        image: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink:v0.1.201
+        image: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink:v0.1.3
         livenessProbe:
           httpGet:
             path: /healthz
