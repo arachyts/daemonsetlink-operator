@@ -17,6 +17,7 @@ env:
   REGISTRY: public.ecr.aws/b1b3q5p7/operators.artnetlab.tech
   IMAGE_NAME: dslink
   BUILD_PLATFORMS: linux/amd64,linux/arm64
+  CHART_PATH: charts/daemonsetlink-operator/Chart.yaml
 
 jobs:
   pre-flight-checks:
@@ -29,6 +30,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref }}
+
+      - name: Check chart version # Has to be manually changed during the release
+        run: |
+          # For 'workflow_dispatch', the ref is the input. For 'push', it's the branch name.
+          REF=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.branch_to_release || github.ref_name }}
+          # Strips 'release-v' prefix to get the version (e.g., release-v0.1.0 -> 0.1.0)
+          BRANCH_VERSION="${REF_NAME#release-v}"
+          echo "ℹ️ Extracted version from branch: $BRANCH_VERSION"
+          
+          # Check if the Chart.yaml file actually exists before proceeding
+          if [ ! -f "$CHART_PATH" ]; then
+            echo "❌ Error: Chart file not found at $CHART_PATH"
+            exit 1
+          fi
+
+          # Extract the 'version' from the Chart.yaml file using the env var
+          CHART_VERSION=$(grep '^version:' $CHART_PATH | awk '{print $2}')
+          echo "ℹ️ Found version in Chart.yaml: $CHART_VERSION"
+
+          # Compare the two versions. If they do not match, exit with an error code.
+          if [ "$BRANCH_VERSION" != "$CHART_VERSION" ]; then
+            echo "❌ Error: Branch version ($BRANCH_VERSION) does not match Chart version ($CHART_VERSION)."
+            echo "Please update the 'version' in $CHART_PATH to match the release branch."
+            exit 1
+          fi
+
+          echo "✅ Success: Branch version and Chart version match."
 
       - name: Configure Go
         uses: actions/setup-go@v5
