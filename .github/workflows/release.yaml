@@ -198,6 +198,7 @@ jobs:
         uses: helm/chart-releaser-action@v1.6.0
         with:
           charts_dir: "charts"
+          release_name_template: "v{{ .Version }}"
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
