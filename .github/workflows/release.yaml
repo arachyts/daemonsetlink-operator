@@ -207,13 +207,6 @@ jobs:
         run: |
           gh release upload ${{ steps.get_chart_info.outputs.tag_name }} dist/install.yaml --clobber
           
-      - name: Deploy install.yaml to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          commit_message: Update install.yaml for release ${{ steps.get_chart_info.outputs.tag_name }}
-
       - name: Create Pull Request back to main
         # This step runs only if the trigger was a branch push
         if: github.event_name == 'push'
