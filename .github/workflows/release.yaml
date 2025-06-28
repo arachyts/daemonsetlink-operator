@@ -116,6 +116,7 @@ jobs:
     needs: build-and-push-controller-image
     permissions:
       contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout code
