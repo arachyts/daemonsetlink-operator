@@ -1,14 +1,11 @@
 # Default namespace for the app resources
 namespace: "kube-system"
-
 nameOverride: "dslink-operator"
-
 image:
   repository: "public.ecr.aws/b1b3q5p7/operators.artnetlab.tech/dslink"
   pullPolicy: IfNotPresent
-
+  tag: v0.1.203
 replicaCount: 1
-
 resources:
   limits:
     cpu: 100m
@@ -16,28 +13,25 @@ resources:
   requests:
     cpu: 10m
     memory: 64Mi
-
 # Node selector for the controller manager pods.
 nodeSelector: {}
 # Tolerations
 tolerations: []
-
 # Affinity rules for the controller manager pods.
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/arch
-          operator: In
-          values:
-          - amd64
-          - arm64
-        - key: kubernetes.io/os
-          operator: In
-          values:
-          - linux
-
+        - matchExpressions:
+            - key: kubernetes.io/arch
+              operator: In
+              values:
+                - amd64
+                - arm64
+            - key: kubernetes.io/os
+              operator: In
+              values:
+                - linux
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -47,32 +41,27 @@ serviceAccount:
   # Additional labels and annotations
   annotations: {}
   labels: {}
-
 rbac:
   create: true
 crd:
   create: true
-
 # This is for setting Kubernetes Annotations to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
 # This is for setting Kubernetes Labels to a Pod.
 # For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 podLabels: {}
-
 # Pod-level security context for the controller manager pods.
 podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
-
 # Container-level security context
 containerSecurityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
-
+      - ALL
 # Controller Manager specific configurations
 controllerManager:
   # Extra labels to add to the Deployment metadata
