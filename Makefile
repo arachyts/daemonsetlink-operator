@@ -177,7 +177,7 @@ build-installer: manifests generate kustomize ## Generate a consolidated YAML wi
 .PHONY: update-helm-sources
 update-helm-sources: ## Updates the Helm chart's appVersion and image tag. The chart 'version' must be updated manually.
 	@echo "--- Updating Helm chart to version $(VERSION) with image $(IMG) ---"
-	yq e -i '.appVersion = strenv(VERSION)' charts/$(PROJECT_NAME)/Chart.yaml
+	VERSION=$(VERSION) yq e -i '.appVersion = strenv(VERSION)' charts/$(PROJECT_NAME)/Chart.yaml
 	yq e -i '.image.repository = "$(shell echo ${IMG} | rev | cut -d: -f2- | rev)"' charts/$(PROJECT_NAME)/values.yaml
 	yq e -i '.image.tag = "$(shell echo ${IMG} | rev | cut -d: -f1 | rev)"' charts/$(PROJECT_NAME)/values.yaml
 
